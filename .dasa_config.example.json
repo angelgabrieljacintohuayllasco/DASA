@@ -1,0 +1,10 @@
+{
+  "embedding_model": "all-MiniLM-L6-v2",
+  "top_k_fragments": 5,
+  "similarity_threshold": 0.2,
+  "dataset_path": "",
+  "agent_b_mode": "statistical",
+  "synthesis_model": "",
+  "ollama_host": "http://localhost:11434",
+  "ollama_model": "qwen2.5:0.5b"
+}

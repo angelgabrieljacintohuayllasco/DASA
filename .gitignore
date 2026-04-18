@@ -10,6 +10,10 @@ secrets/
 credentials/
 config/local_config.py
 
+# Archivos de configuración y secretos generados por el launcher (NO subir)
+.dasa_api_key
+.dasa_config.json
+
 # Datos masivos, shards y cachés (Archivos pesados que GitHub no permite o recomienda no subir)
 data/spanish_bff_shard/
 *.bloom
