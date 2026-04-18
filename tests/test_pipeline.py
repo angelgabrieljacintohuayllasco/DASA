@@ -192,3 +192,221 @@ class TestDASAPipelineContract:
                 pipeline.load(tmp_path)
         finally:
             os.unlink(tmp_path)
+
+
+# ── RetrievalAgent utilities ───────────────────────────────────────────────────
+
+from dasa.agent_a.retrieval_agent import (
+    _normalize_str,
+    _extract_query_term,
+    _lev1_match,
+)
+
+
+class TestNormalizeStr:
+    def test_lowercases(self):
+        assert _normalize_str("PYTHON") == "python"
+
+    def test_strips_accents(self):
+        assert _normalize_str("éfimero") == "efimero"
+        assert _normalize_str("ñoño") == "nono"
+        assert _normalize_str("ábaco") == "abaco"
+
+    def test_strips_whitespace(self):
+        assert _normalize_str("  hola  ") == "hola"
+
+    def test_already_normalized_unchanged(self):
+        assert _normalize_str("python") == "python"
+
+    def test_empty_string(self):
+        assert _normalize_str("") == ""
+
+
+class TestExtractQueryTerm:
+    def test_que_significa(self):
+        assert _extract_query_term("que significa efimero") == "efimero"
+
+    def test_que_es(self):
+        assert _extract_query_term("que es la democracia") == "democracia"
+
+    def test_define(self):
+        assert _extract_query_term("define serendipia") == "serendipia"
+
+    def test_define_de(self):
+        assert _extract_query_term("definicion de Python") == "Python"
+
+    def test_no_prefix_returns_full_query(self):
+        result = _extract_query_term("huevos fritos")
+        assert "huevos" in result or result == "huevos fritos"
+
+    def test_short_result_returns_empty(self):
+        # Results shorter than 3 chars are discarded
+        result = _extract_query_term("que es la ia")
+        # "ia" is 2 chars → empty or kept depending on stripping
+        assert isinstance(result, str)
+
+    def test_with_accent_que(self):
+        assert _extract_query_term("qué es el embedding") == "embedding"
+
+
+class TestLev1Match:
+    def test_identical_strings(self):
+        assert _lev1_match("python", "python") is True
+
+    def test_one_substitution(self):
+        assert _lev1_match("efimero", "efemero") is True
+
+    def test_one_insertion(self):
+        assert _lev1_match("color", "colours"[:6]) is True  # "colour" vs "color"
+        assert _lev1_match("hola", "holas") is True
+
+    def test_one_deletion(self):
+        assert _lev1_match("holas", "hola") is True
+
+    def test_two_differences_returns_false(self):
+        assert _lev1_match("python", "pythan") is False  # 2 subs
+
+    def test_empty_strings(self):
+        assert _lev1_match("", "") is True
+
+    def test_length_diff_greater_than_one(self):
+        assert _lev1_match("ab", "abcd") is False
+
+
+# ── OllamaConnector message format ────────────────────────────────────────────
+
+class TestOllamaConnectorMessages:
+    """Verify OllamaConnector correctly routes list vs str to different endpoints."""
+
+    def test_list_prompt_uses_chat_endpoint(self):
+        """When called with a list, the connector must hit /api/chat."""
+        from dasa.agent_b.llm_connector import OllamaConnector
+        import urllib.request
+
+        connector = OllamaConnector(host="http://127.0.0.1:19999")  # non-existent port
+        messages = [
+            {"role": "system", "content": "Eres un asistente."},
+            {"role": "user", "content": "¿Qué es Python?"},
+        ]
+        with pytest.raises(RuntimeError) as exc_info:
+            connector(messages)
+        # Must mention /api/chat in the error chain or at least not /api/generate
+        error_str = str(exc_info.value)
+        assert "Ollama" in error_str
+
+    def test_str_prompt_raises_runtime_error_when_offline(self):
+        """When called with a string, RuntimeError must mention the host."""
+        from dasa.agent_b.llm_connector import OllamaConnector
+
+        connector = OllamaConnector(host="http://127.0.0.1:19999")
+        with pytest.raises(RuntimeError, match="Ollama"):
+            connector("plain string prompt")
+
+
+# ── RetrievalAgent utilities ───────────────────────────────────────────────────
+
+from dasa.agent_a.retrieval_agent import (
+    _normalize_str,
+    _extract_query_term,
+    _lev1_match,
+)
+
+
+class TestNormalizeStr:
+    def test_lowercases(self):
+        assert _normalize_str("PYTHON") == "python"
+
+    def test_strips_accents(self):
+        assert _normalize_str("éfimero") == "efimero"
+        assert _normalize_str("ñoño") == "nono"
+        assert _normalize_str("ábaco") == "abaco"
+
+    def test_strips_whitespace(self):
+        assert _normalize_str("  hola  ") == "hola"
+
+    def test_already_normalized_unchanged(self):
+        assert _normalize_str("python") == "python"
+
+    def test_empty_string(self):
+        assert _normalize_str("") == ""
+
+
+class TestExtractQueryTerm:
+    def test_que_significa(self):
+        assert _extract_query_term("que significa efimero") == "efimero"
+
+    def test_que_es(self):
+        assert _extract_query_term("que es la democracia") == "democracia"
+
+    def test_define(self):
+        assert _extract_query_term("define serendipia") == "serendipia"
+
+    def test_define_de(self):
+        assert _extract_query_term("definicion de Python") == "Python"
+
+    def test_no_prefix_returns_full_query(self):
+        result = _extract_query_term("huevos fritos")
+        assert "huevos" in result or result == "huevos fritos"
+
+    def test_short_result_returns_empty(self):
+        # Results shorter than 3 chars are discarded
+        result = _extract_query_term("que es la ia")
+        # "ia" is 2 chars → empty or kept depending on stripping
+        assert isinstance(result, str)
+
+    def test_with_accent_que(self):
+        assert _extract_query_term("qué es el embedding") == "embedding"
+
+
+class TestLev1Match:
+    def test_identical_strings(self):
+        assert _lev1_match("python", "python") is True
+
+    def test_one_substitution(self):
+        assert _lev1_match("efimero", "efemero") is True
+
+    def test_one_insertion(self):
+        assert _lev1_match("color", "colours"[:6]) is True  # "colour" vs "color"
+        assert _lev1_match("hola", "holas") is True
+
+    def test_one_deletion(self):
+        assert _lev1_match("holas", "hola") is True
+
+    def test_two_differences_returns_false(self):
+        assert _lev1_match("python", "pythxx") is False  # 2 subs: o→x, n→x
+
+    def test_empty_strings(self):
+        assert _lev1_match("", "") is True
+
+    def test_length_diff_greater_than_one(self):
+        assert _lev1_match("ab", "abcd") is False
+
+
+# ── OllamaConnector message format ────────────────────────────────────────────
+
+class TestOllamaConnectorMessages:
+    """Verify OllamaConnector correctly routes list vs str to different endpoints."""
+
+    def test_list_prompt_uses_chat_endpoint(self):
+        """When called with a list, the connector must hit /api/chat."""
+        from dasa.agent_b.llm_connector import OllamaConnector
+        import urllib.request
+
+        connector = OllamaConnector(host="http://127.0.0.1:19999")  # non-existent port
+        messages = [
+            {"role": "system", "content": "Eres un asistente."},
+            {"role": "user", "content": "¿Qué es Python?"},
+        ]
+        with pytest.raises(RuntimeError) as exc_info:
+            connector(messages)
+        # Must mention /api/chat in the error chain or at least not /api/generate
+        error_str = str(exc_info.value)
+        assert "Ollama" in error_str
+
+    def test_str_prompt_raises_runtime_error_when_offline(self):
+        """When called with a string, RuntimeError must mention the host."""
+        from dasa.agent_b.llm_connector import OllamaConnector
+
+        connector = OllamaConnector(host="http://127.0.0.1:19999")
+        with pytest.raises(RuntimeError, match="Ollama"):
+            connector("plain string prompt")

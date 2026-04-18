@@ -75,10 +75,13 @@ class DASAPipeline:
 
         fragments = self.agent_a.search(query)
 
-        if not fragments:
-            return "No relevant information found in the database for this query."
+        if not fragments and not self.agent_b.engine_loaded:
+            return "No se encontró información relevante en el corpus para esta consulta."
 
-        return self.agent_b.synthesize(query, fragments)
+        result = self.agent_b.synthesize(query, fragments)
+        if not result:
+            return "No se encontró información suficiente en el corpus para responder esta consulta."
+        return result
 
     def __repr__(self) -> str:
         status = "ready" if self._ready else "not loaded"

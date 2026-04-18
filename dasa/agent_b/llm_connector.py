@@ -134,7 +134,9 @@ class OllamaConnector:
         connector = OllamaConnector(model="gemma3:4b")
         engine._llm_callable = connector
 
-    Falls back gracefully if Ollama is not running.
+    Accepts both OpenAI-style chat message lists and plain strings:
+      - list  → POST /api/chat   (preserves system/user roles)
+      - str   → POST /api/generate
     """
 
     def __init__(
@@ -147,26 +149,54 @@ class OllamaConnector:
         self.host = host
         self.timeout = timeout
 
-    def __call__(self, prompt: str) -> str:
-        try:
-            import urllib.request
-            import json as _json
+    def __call__(self, prompt: "list | str") -> str:
+        """
+        Generate a completion via Ollama.
 
-            payload = _json.dumps({
-                "model": self.model,
-                "prompt": prompt,
-                "stream": False,
-                "options": {"temperature": 0.2, "num_predict": 256},
-            }).encode()
+        Args:
+            prompt: Either an OpenAI-style list of chat dicts
+                    [{'role': 'system', 'content': '...'},
+                     {'role': 'user',   'content': '...'}]
+                    or a plain string.
+
+        Returns:
+            The generated text, stripped.
+        """
+        import urllib.request
+        import json as _json
+
+        try:
+            if isinstance(prompt, list):
+                # Chat endpoint — preserves system/user role separation
+                payload = _json.dumps({
+                    "model": self.model,
+                    "messages": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.2, "num_predict": 256},
+                }).encode()
+                url = f"{self.host}/api/chat"
+                key = "message"  # response is {"message": {"role": "assistant", "content": "..."}}
+            else:
+                # Generate endpoint — plain string prompt
+                payload = _json.dumps({
+                    "model": self.model,
+                    "prompt": str(prompt),
+                    "stream": False,
+                    "options": {"temperature": 0.2, "num_predict": 256},
+                }).encode()
+                url = f"{self.host}/api/generate"
+                key = "response"
 
             req = urllib.request.Request(
-                f"{self.host}/api/generate",
+                url,
                 data=payload,
                 headers={"Content-Type": "application/json"},
             )
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 result = _json.loads(resp.read())
-                return result.get("response", "").strip()
+                if key == "message":
+                    return result.get("message", {}).get("content", "").strip()
+                return result.get(key, "").strip()
 
         except Exception as exc:
             raise RuntimeError(

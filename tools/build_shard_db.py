@@ -30,7 +30,7 @@ try:
     from shard.index.index_builder import IndexBuilder
 except ImportError as e:
     print(f"ERROR: No se puede importar SHARD: {e}")
-    print("Instala SHARD con:  pip install -e C:/Users/PC/Desktop/SHARD")
+    print("Instala SHARD con:  pip install shard-db  (o: pip install -e /path/to/SHARD-main)")
     sys.exit(1)
 
 

@@ -216,8 +216,9 @@ class RetrievalAgent:
         except ImportError as exc:
             raise ImportError(
                 "SHARD package not found. Install it with:\n"
-                "  pip install -e C:/Users/PC/Desktop/SHARD\n"
-                "or add it to PYTHONPATH."
+                "  pip install shard-db\n"
+                "or, if using the source repo:\n"
+                "  pip install -e /path/to/SHARD-main"
             ) from exc
 
         self._shard_reader = MMapReader(db_path, num_shards=self.config.shard_num_shards)
@@ -364,10 +365,10 @@ def _ensure_shard_importable() -> None:
         return
     except ImportError:
         pass
-    # Try common locations relative to this file and the user's desktop
+    # Try common locations relative to this file
     candidates = [
-        Path(__file__).parent.parent.parent.parent / "SHARD",  # sibling repo
-        Path.home() / "Desktop" / "SHARD",
+        Path(__file__).parent.parent.parent.parent / "SHARD-main",  # sibling repo (packaged)
+        Path(__file__).parent.parent.parent.parent / "SHARD",       # sibling repo (dev)
     ]
     for candidate in candidates:
         if (candidate / "shard" / "__init__.py").exists():
