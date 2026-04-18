@@ -1,0 +1,88 @@
+# Archivos específicos solicitados
+historial chat.md
+
+# Credenciales y secretos
+.env
+.env.*
+*.pem
+*.key
+secrets/
+credentials/
+config/local_config.py
+
+# Datos masivos, shards y cachés (Archivos pesados que GitHub no permite o recomienda no subir)
+data/spanish_bff_shard/
+*.bloom
+*.npy
+*.h5
+*.hdf5
+*.pkl
+*.sqlite
+*.sqlite3
+*.db
+# Si deseas mantener la carpeta data pero vacía en GitHub, descomenta la siguiente línea y asegúrate de tener un archivo .gitkeep dentro
+# data/*
+# !data/.gitkeep
+# !data/demo_dataset.json
+
+# Python - Archivos compilados y cachés
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+*.egg
+
+# Entornos virtuales (Librerías descargadas localmente)
+venv/
+.venv/
+env/
+.env_dir/
+ENV/
+
+# Empaquetado y distribución
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+
+# Logs e historial de ejecución
+*.log
+logs/
+
+# Herramientas de pruebas y cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+
+# Configuración de IDEs y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+.project
+.pydevproject
+
+# Archivos del Sistema Operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+ehthumbs_vista.db
+[Tt]humbs.db

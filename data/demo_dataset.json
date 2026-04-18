@@ -1,0 +1,12 @@
+[
+  {"id": "001", "lemma": "huevo", "definition": "Cuerpo redondeado producido por las aves, que contiene el embrión de la cría. Es un alimento básico en la dieta humana."},
+  {"id": "002", "lemma": "huevo frito", "definition": "Preparación culinaria que consiste en freír el huevo en aceite caliente durante aproximadamente 3 minutos. Se recomienda añadir sal al gusto al finalizar."},
+  {"id": "003", "lemma": "huevo hervido", "definition": "Técnica de cocción en la que el huevo se introduce en agua fría, se lleva a ebullición y se cocina entre 8 y 10 minutos para obtener el huevo duro."},
+  {"id": "004", "lemma": "tortilla de huevos", "definition": "Preparación que mezcla huevos batidos con sal y se cocina en sartén con aceite. Puede incluir patata o cebolla."},
+  {"id": "005", "lemma": "Python", "definition": "Lenguaje de programación interpretado, de alto nivel y propósito general, creado por Guido van Rossum en 1991. Conocido por su sintaxis legible."},
+  {"id": "006", "lemma": "inteligencia artificial", "definition": "Rama de la informática que desarrolla sistemas capaces de realizar tareas que normalmente requieren inteligencia humana, como el razonamiento y el aprendizaje."},
+  {"id": "007", "lemma": "alucinación de IA", "definition": "Fenómeno por el que un modelo de lenguaje genera información factualmente incorrecta o inventada con aparente confianza, sin basarse en datos reales."},
+  {"id": "008", "lemma": "embedding", "definition": "Representación numérica densa de un texto en un espacio vectorial de alta dimensión que captura su significado semántico."},
+  {"id": "009", "lemma": "Raspberry Pi", "definition": "Microordenador de bajo coste y tamaño reducido, fabricado por la Fundación Raspberry Pi, diseñado para la educación y proyectos de computación."},
+  {"id": "010", "lemma": "base de datos", "definition": "Colección organizada de información estructurada almacenada electrónicamente, accesible y gestionable mediante un sistema de gestión de bases de datos."}
+]
