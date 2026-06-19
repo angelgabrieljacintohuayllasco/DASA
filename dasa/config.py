@@ -47,6 +47,16 @@ class DASAConfig:
     """Number of shards in the SHARD database. Must match the value used
     when the database was built."""
 
+    # ── IVF-PQ index (preferred when <shard_db_path>/ivf/ exists) ──────────────
+    ivf_nprobe: Optional[int] = None
+    """Lists probed per IVF-PQ query. None uses the index's built-in default
+    (set per profile at build time). Higher = better recall, slower."""
+
+    ivf_overfetch: int = 8
+    """Candidate multiplier: Agent A asks the index for top_k_fragments *
+    ivf_overfetch candidates so the exact-match boost can promote a fuzzy
+    key match that ranks just outside the raw top-k."""
+
     # ── Misc ──────────────────────────────────────────────────────────────────
     demo_data_path: str = "data/demo_dataset.json"
     """Default dataset path used by DASAPipeline.load() when no path is given."""

@@ -100,6 +100,7 @@ class RetrievalAgent:
 
         # SHARD backend objects (only used when config.use_shard_backend=True)
         self._shard_reader = None    # MMapReader — exact key lookup
+        self._ivf = None             # IVFPQReader — approximate vector search (preferred)
         self._shard_index = None     # IndexReader — MinHash similarity (fallback)
         self._embed_cache = None     # np.ndarray (N, dim) — pre-computed embeddings
         self._embed_keys: List[str] = []       # key list parallel to _embed_cache rows
@@ -195,12 +196,13 @@ class RetrievalAgent:
         Open the SHARD database and load auxiliary search structures.
 
         Priority:
-          1. embeddings.npy + embedding_keys.json  → fast cosine similarity (best)
+          0. ivf/manifest.json                     → IVF-PQ approximate search (best, scales to 1 TB)
+          1. embeddings.npy + embedding_keys.json  → brute-force cosine (small datasets)
           2. index.minhash.bin                     → MinHash Jaccard (fallback)
           3. Neither                               → exact key lookup only
 
-        The embedding cache (~96 MB for 66k records) is the recommended path.
-        Build it once with: python tools/build_embedding_cache.py
+        The IVF-PQ index is the recommended path for anything beyond a few tens
+        of thousands of records. Build it with: python -m shard.index.ivfpq_builder
         """
         db_path = self.config.shard_db_path
         if not db_path:
@@ -222,6 +224,15 @@ class RetrievalAgent:
             ) from exc
 
         self._shard_reader = MMapReader(db_path, num_shards=self.config.shard_num_shards)
+
+        # ── Option 0: IVF-PQ index (approximate vector search, scales to TB) ───
+        ivf_dir = Path(db_path) / "ivf"
+        if (ivf_dir / "manifest.json").exists():
+            from shard.index.ivfpq_reader import IVFPQReader
+            self._ivf = IVFPQReader(str(ivf_dir))
+            print(f"[Agent A] Indice IVF-PQ cargado: {self._ivf.n_total:,} vectores, "
+                  f"K={self._ivf.K}, m={self._ivf.m}, rerank={self._ivf.rerank}.")
+            return
 
         # ── Option 1: embedding cache (cosine similarity, most accurate) ───────
         embed_file = Path(db_path) / "embeddings.npy"
@@ -269,6 +280,49 @@ class RetrievalAgent:
             raise RuntimeError("SHARD backend not loaded.")
 
         import numpy as np
+
+        # ── Tier 0: IVF-PQ approximate search (preferred; scales to TB) ──────
+        if self._ivf is not None:
+            query_emb = self.embedding_engine.encode(query)
+            overfetch = max(1, getattr(self.config, "ivf_overfetch", 8))
+            cand = self._ivf.search(
+                query_emb,
+                top_k=self.config.top_k_fragments * overfetch,
+                nprobe=getattr(self.config, "ivf_nprobe", None),
+            )
+            # Exact-match boost on the shortlist (preserves Tier-1 behavior): a
+            # record whose key exactly/fuzzily matches the query term is promoted.
+            _qt = _extract_query_term(query)
+            _norm_qt = _normalize_str(_qt) if _qt else ""
+            boosted = []
+            for key, score in cand:
+                s = float(score)
+                if _norm_qt:
+                    nk = _normalize_str(key)
+                    if nk == _norm_qt:
+                        s = min(1.0, s + 0.40)
+                    elif len(_norm_qt) >= 5 and _lev1_match(_norm_qt, nk):
+                        s = min(1.0, s + 0.28)
+                boosted.append((key, s))
+            boosted.sort(key=lambda t: t[1], reverse=True)
+
+            fragments = []
+            for key, s in boosted:
+                if s < self.config.similarity_threshold:
+                    continue
+                raw = self._shard_reader.find(key)
+                if raw is None:
+                    continue
+                try:
+                    record = json.loads(raw)
+                except (json.JSONDecodeError, TypeError):
+                    record = {"text": str(raw)}
+                fragments.append(Fragment(
+                    text=self._record_to_text(record), score=s, source_id=key,
+                ))
+                if len(fragments) >= self.config.top_k_fragments:
+                    break
+            return rank_fragments(fragments)[: self.config.top_k_fragments]
 
         # ── Tier 1: embedding cache ──────────────────────────────────────────
         if self._embed_cache is not None:
