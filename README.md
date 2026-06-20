@@ -691,6 +691,56 @@ pipeline.load("mi_base/")   # Pasa el directorio, no un archivo JSON
 respuesta = pipeline.run("¿Qué es el Big Bang?")
 ```
 
+### Búsqueda vectorial a escala: índice IVF-PQ
+
+Para millones o miles de millones de registros, la búsqueda por fuerza bruta
+(comparar la consulta contra TODOS los vectores) no escala — exigiría cargar
+~150 GB de embeddings en RAM con 100M registros. La solución es el **índice
+IVF-PQ de SHARD**: salta solo a los clusters relevantes (como un índice de base
+de datos salta a la fila) y comprime cada vector ~32× con product quantization.
+El índice vive en disco vía mmap; solo lo que se consulta toca la RAM.
+
+**El build es pesado y va offline** (Colab/PC potente); el artefacto read-only se
+copia al equipo de 2 GB que solo consulta. Agent A detecta y usa el índice `ivf/`
+automáticamente — sin cambios de código.
+
+```bash
+# 1. (máquina potente) construir el índice desde embeddings + claves
+python -m shard.cli build-ivf --embeddings emb.npy --keys keys.json \
+    --out mi_base/ivf --profile low-ram        # low-ram | medium | fast
+
+# 2. copiar mi_base/ (shards + ivf/) al equipo de 2 GB
+```
+
+```python
+config = DASAConfig(use_shard_backend=True, shard_db_path="mi_base/")
+pipeline = DASAPipeline(config)
+pipeline.load("mi_base/")          # Agent A carga el índice IVF-PQ si existe
+respuesta = pipeline.run("¿Qué es el Big Bang?")
+```
+
+Si `mi_base/ivf/` existe, Agent A usa búsqueda aproximada IVF-PQ (Tier 0, escala
+a TB). Si no, cae a la caché de embeddings (datasets chicos) o MinHash. RAM de
+consulta: ~110 MB a 100M vectores, ~410 MB a 1B — cabe en el piso de 2 GB.
+
+### Estructura de una base SHARD con índice IVF-PQ
+
+```
+mi_base/
+├── shard_000000.bin      # Datos binarios del shard 0 (registros)
+├── shard_000000.bloom    # Filtro Bloom del shard 0
+├── ...
+└── ivf/                  # Índice vectorial IVF-PQ (búsqueda semántica)
+    ├── manifest.json     # params + formato (portable, sin rutas absolutas)
+    ├── coarse_centroids.f32
+    ├── pq_codebooks.f32
+    ├── list_codes.u8     # códigos PQ (mmap, nunca todo en RAM)
+    ├── list_offsets.i64
+    ├── row_to_orig.i64
+    ├── keys.bin / key_offsets.i64
+    └── rerank_vecs.*     # caché de rerank (sq8 o f32)
+```
+
 ---
 
 ## Estructura del proyecto
@@ -850,9 +900,9 @@ Solo para descargar el modelo de embeddings la primera vez (~80 MB). Después to
 - [x] Fallback autónomo del LLM (respuestas libres cuando el corpus no cubre el tema)
 - [x] Umbral de relevancia real (score ≥ 0.40 para modo grounded)
 - [x] System prompt del cliente respetado en modo libre (Jan, Open WebUI, etc.)
+- [x] Búsqueda vectorial IVF-PQ a escala (Agent A Tier 0, mmap, hasta ~1 TB en 2 GB RAM)
 - [ ] **DASA Coding** — corpus de documentación de librerías + generación de código sin alucinaciones
 - [ ] Soporte multilingüe nativo (embeddings multilingüe por defecto)
-- [ ] Conector SHARD nativo en el pipeline principal
 - [ ] Extensiones de herramientas para Agente A: razonamiento matemático, fechas, agregaciones
 - [ ] **DASA Expert** — múltiples datasets especializados con enrutamiento semántico
 - [ ] **DASA MoE** — Mixture of Experts: agentes especializados coordinados por router semántico
@@ -1066,7 +1116,7 @@ DASA works with any JSON array. Minimal format:
 ]
 ```
 
-For TB-scale datasets, use **[SHARD](https://github.com/YOUR_ORG/shard)** — the purpose-built binary hash-sharded database designed for DASA.
+For TB-scale datasets, use **[SHARD](https://github.com/angelgabrieljacintohuayllasco/SHARD)** — the purpose-built binary hash-sharded database (now with numpy-only IVF-PQ vector search) designed for DASA.
 
 ---
 
@@ -1078,7 +1128,8 @@ Given the same query and the same database, DASA **always produces the same clas
 
 ## Roadmap
 
-- [ ] SHARD backend integration (native connector)
+- [x] SHARD backend integration (native connector)
+- [x] IVF-PQ vector search at scale (Agent A Tier 0, mmap, up to ~1 TB on 2 GB RAM)
 - [ ] Multi-language embedding support
 - [ ] Streaming response mode for large fragment sets
 - [ ] Agent A tool extensions: math reasoning, date parsing, aggregation
