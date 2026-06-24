@@ -194,8 +194,8 @@ El Agente B toma los fragmentos verificados del Agente A y produce una respuesta
 ### Paso 1 — Clonar o descargar el repositorio
 
 ```bash
-git clone https://github.com/angelgabrieljacintohuayllasco-lgtm/DASA-IA.git
-cd DASA-IA
+git clone https://github.com/angelgabrieljacintohuayllasco/DASA.git
+cd DASA
 ```
 
 ### Paso 2 — Instalar dependencias
@@ -938,9 +938,9 @@ No soy solo el desarrollador de DASA y SHARD. Tengo una cartera de proyectos rea
 | **XpendiXcash** | Gestor de gastos personales con asistente IA, membresías y control financiero inteligente | [xpendixcash.online](https://xpendixcash.online/) |
 | **Rexorvex** | Agencia de marketing digital, contenido tech, cursos premium y herramientas de venta | [rexorvex.digital](https://rexorvex.digital/) |
 | **LylConnect** | Reventa de internet fibra + planes móviles, mayor cobertura = mayor margen, reducción de costos en personal con IA | [lylconnect.com](https://lylconnect.com/) |
-| **DASA** | Motor RAG anti-alucinación — IA para empresas que no puede inventar hechos, corre local | [github/DASA](https://github.com/angelgabrieljacintohuayllasco-lgtm/DASA) |
-| **SHARD** | Base de datos binaria hash-sharded diseñada para búsqueda semántica a escala de TB | [github/SHARD](https://github.com/angelgabrieljacintohuayllasco-lgtm/SHARD) |
-| **G-Mini-Agent** | Agente IA generalista de alto valor para empresas que necesitan automatizar procesos sin contratar más personal | [github/G-Mini-Agent](https://github.com/angelgabrieljacintohuayllasco-lgtm/G-Mini-Agent) |
+| **DASA** | Motor RAG anti-alucinación — IA para empresas que no puede inventar hechos, corre local | [github/DASA](https://github.com/angelgabrieljacintohuayllasco/DASA) |
+| **SHARD** | Base de datos binaria hash-sharded diseñada para búsqueda semántica a escala de TB | [github/SHARD](https://github.com/angelgabrieljacintohuayllasco/SHARD) |
+| **G-Mini-Agent** | Agente IA generalista de alto valor para empresas que necesitan automatizar procesos sin contratar más personal | [github/G-Mini-Agent](https://github.com/angelgabrieljacintohuayllasco/G-Mini-Agent) |
 
 Además: desarrollo de agentes IA a medida, webs freelance y consultoría de automatización.
 
@@ -980,11 +980,11 @@ Ver [CONTRIBUTING.md](CONTRIBUTING.md). Bienvenidas contribuciones en:
 
 ## ⭐ Star History
 
-<a href="https://star-history.com/#angelgabrieljacintohuayllasco-lgtm/DASA-IA&Date">
+<a href="https://star-history.com/#angelgabrieljacintohuayllasco/DASA&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=angelgabrieljacintohuayllasco-lgtm/DASA-IA&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=angelgabrieljacintohuayllasco-lgtm/DASA-IA&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=angelgabrieljacintohuayllasco-lgtm/DASA-IA&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=angelgabrieljacintohuayllasco/DASA&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=angelgabrieljacintohuayllasco/DASA&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=angelgabrieljacintohuayllasco/DASA&type=Date" />
  </picture>
 </a>
 
@@ -1150,11 +1150,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). We welcome contributions in:
 
 ## ⭐ Star History
 
-<a href="https://star-history.com/#angelgabrieljacintohuayllasco-lgtm/DASA-IA&Date">
+<a href="https://star-history.com/#angelgabrieljacintohuayllasco/DASA&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=angelgabrieljacintohuayllasco-lgtm/DASA-IA&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=angelgabrieljacintohuayllasco-lgtm/DASA-IA&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=angelgabrieljacintohuayllasco-lgtm/DASA-IA&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=angelgabrieljacintohuayllasco/DASA&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=angelgabrieljacintohuayllasco/DASA&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=angelgabrieljacintohuayllasco/DASA&type=Date" />
  </picture>
 </a>
 
